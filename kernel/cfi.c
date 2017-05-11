@@ -12,6 +12,7 @@
 #include <linux/spinlock.h>
 #include <asm/bug.h>
 #include <asm/cacheflush.h>
+#include <asm/memory.h>
 #include <asm/set_memory.h>
 
 /* Compiler-defined handler names */
@@ -118,6 +119,7 @@ static void prepare_next_shadow(const struct cfi_shadow __rcu *prev,
 			continue;
 
 		index = ptr_to_shadow(next, shadow_to_page(prev, i));
+
 		if (index < 0)
 			continue;
 
@@ -228,6 +230,7 @@ static inline cfi_check_fn ptr_to_check_fn(const struct cfi_shadow __rcu *s,
 	unsigned long ptr)
 {
 	int index;
+	unsigned long check;
 
 	if (unlikely(!s))
 		return NULL; /* No shadow available */
@@ -290,6 +293,7 @@ void cfi_slowpath_handler(uint64_t id, void *ptr, void *diag)
 		check(id, ptr, diag);
 	else /* Don't allow unchecked modules */
 		handle_cfi_failure(ptr);
+)
 }
 EXPORT_SYMBOL(cfi_slowpath_handler);
 #endif /* CONFIG_MODULES */
@@ -303,4 +307,15 @@ EXPORT_SYMBOL(cfi_failure_handler);
 void __cfi_check_fail(void *data, void *ptr)
 {
 	handle_cfi_failure(ptr);
+}
+
+void cfi_failure_handler(void *data, void *value, void *vtable)
+{
+	handle_cfi_failure();
+}
+EXPORT_SYMBOL(cfi_failure_handler);
+
+void __cfi_check_fail(void *data, void *value)
+{
+	handle_cfi_failure();
 }
