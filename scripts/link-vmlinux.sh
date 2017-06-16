@@ -129,6 +129,19 @@ recordmcount()
 	fi
 }
 
+# If CONFIG_LTO_CLANG is selected, we postpone running recordmcount until
+# we have compiled LLVM IR to an object file.
+recordmcount()
+{
+	if [ -z "${CONFIG_LTO_CLANG}" ]; then
+		return
+	fi
+
+	if [ -n "${CONFIG_FTRACE_MCOUNT_RECORD}" ]; then
+		scripts/recordmcount ${RECORDMCOUNT_FLAGS} $*
+	fi
+}
+
 # Link of vmlinux
 # ${1} - optional extra .o files
 # ${2} - output file
@@ -284,6 +297,13 @@ modpost_link vmlinux.o
 ${MAKE} -f "${srctree}/scripts/Makefile.modpost" vmlinux.o
 
 if [ -n "${CONFIG_LTO_CLANG}" ]; then
+
+	# Re-use vmlinux.o, so we can avoid the slow LTO link step in
+	# vmlinux_link
+	KBUILD_VMLINUX_INIT=
+	KBUILD_VMLINUX_MAIN=vmlinux.o
+	KBUILD_VMLINUX_LIBS=
+
 	# Call recordmcount if needed
 	recordmcount vmlinux.o
 fi
