@@ -78,8 +78,14 @@ extern void __chk_io_ptr(const volatile void __iomem *);
 #include <asm/compiler.h>
 #endif
 
+#if defined(CC_USING_HOTPATCH) && !defined(__CHECKER__)
+#define notrace __attribute__((hotpatch(0,0)))
+#else
+#define notrace __attribute__((no_instrument_function))
+#endif
+
 /*
- * Generic compiler-independent macros required for kernel
+ * Generic compiler-dependent macros required for kernel
  * build go below this comment. Actual compiler/compiler version
  * specific implementations come from the above header files
  */
@@ -194,6 +200,88 @@ struct ftrace_likely_data {
 #define __diag_error(compiler, version, option, comment) \
 	__diag_ ## compiler(version, error, option)
 
+#ifdef __KERNEL__
+/*
+ * Allow us to mark functions as 'deprecated' and have gcc emit a nice
+ * warning for each use, in hopes of speeding the functions removal.
+ * Usage is:
+ * 		int __deprecated foo(void)
+ */
+#ifndef __deprecated
+# define __deprecated		/* unimplemented */
+#endif
+
+#ifdef MODULE
+#define __deprecated_for_modules __deprecated
+#else
+#define __deprecated_for_modules
+#endif
+
+#ifndef __must_check
+#define __must_check
+#endif
+
+#ifndef CONFIG_ENABLE_MUST_CHECK
+#undef __must_check
+#define __must_check
+#endif
+#ifndef CONFIG_ENABLE_WARN_DEPRECATED
+#undef __deprecated
+#undef __deprecated_for_modules
+#define __deprecated
+#define __deprecated_for_modules
+#endif
+
+#ifndef __malloc
+#define __malloc
+#endif
+
+/*
+ * Allow us to avoid 'defined but not used' warnings on functions and data,
+ * as well as force them to be emitted to the assembly file.
+ *
+ * As of gcc 3.4, static functions that are not marked with attribute((used))
+ * may be elided from the assembly file.  As of gcc 3.4, static data not so
+ * marked will not be elided, but this may change in a future gcc version.
+ *
+ * NOTE: Because distributions shipped with a backported unit-at-a-time
+ * compiler in gcc 3.3, we must define __used to be __attribute__((used))
+ * for gcc >=3.3 instead of 3.4.
+ *
+ * In prior versions of gcc, such functions and data would be emitted, but
+ * would be warned about except with attribute((unused)).
+ *
+ * Mark functions that are referenced only in inline assembly as __used so
+ * the code is emitted even though it appears to be unreferenced.
+ */
+#ifndef __used
+# define __used			/* unimplemented */
+#endif
+
+#ifndef __maybe_unused
+# define __maybe_unused		/* unimplemented */
+#endif
+
+#ifndef __always_unused
+# define __always_unused	/* unimplemented */
+#endif
+
+#ifndef noinline
+#define noinline
+#endif
+
+/*
+ * Rather then using noinline to prevent stack consumption, use
+ * noinline_for_stack instead.  For documentation reasons.
+ */
+#define noinline_for_stack noinline
+
+#ifndef __always_inline
+#define __always_inline inline
+#endif
+
+#endif /* __KERNEL__ */
+
 /*
  * From the GCC manual:
  *
@@ -297,5 +385,84 @@ struct ftrace_likely_data {
  * noinline_for_stack instead.  For documentation reasons.
  */
 #define noinline_for_stack noinline
+
+/*
+ * From the GCC manual:
+ *
+ * Many functions do not examine any values except their arguments,
+ * and have no effects except the return value.  Basically this is
+ * just slightly more strict class than the `pure' attribute above,
+ * since function is not allowed to read global memory.
+ *
+ * Note that a function that has pointer arguments and examines the
+ * data pointed to must _not_ be declared `const'.  Likewise, a
+ * function that calls a non-`const' function usually must not be
+ * `const'.  It does not make sense for a `const' function to return
+ * `void'.
+ */
+#ifndef __attribute_const__
+# define __attribute_const__	/* unimplemented */
+#endif
+
+#ifndef __designated_init
+# define __designated_init
+#endif
+
+#ifndef __latent_entropy
+# define __latent_entropy
+#endif
+
+#ifndef __randomize_layout
+# define __randomize_layout __designated_init
+#endif
+
+#ifndef __no_randomize_layout
+# define __no_randomize_layout
+#endif
+
+#ifndef randomized_struct_fields_start
+# define randomized_struct_fields_start
+# define randomized_struct_fields_end
+#endif
+
+/*
+ * Tell gcc if a function is cold. The compiler will assume any path
+ * directly leading to the call is unlikely.
+ */
+
+#ifndef __cold
+#define __cold
+#endif
+
+/* Simple shorthand for a section definition */
+#ifndef __section
+# define __section(S) __attribute__ ((__section__(#S)))
+#endif
+
+#ifndef __visible
+#define __visible
+#endif
+
+#ifndef __nostackprotector
+# define __nostackprotector
+#endif
+
+/*
+ * Assume alignment of return value.
+ */
+#ifndef __assume_aligned
+#define __assume_aligned(a, ...)
+#endif
+
+
+/* Are two types/vars the same type (ignoring qualifiers)? */
+#ifndef __same_type
+# define __same_type(a, b) __builtin_types_compatible_p(typeof(a), typeof(b))
+#endif
+
+/* Is this type a native word size -- useful for atomic operations */
+#ifndef __native_word
+# define __native_word(t) (sizeof(t) == sizeof(char) || sizeof(t) == sizeof(short) || sizeof(t) == sizeof(int) || sizeof(t) == sizeof(long))
+#endif
 
 #endif /* __LINUX_COMPILER_TYPES_H */
