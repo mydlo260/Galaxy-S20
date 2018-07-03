@@ -66,9 +66,9 @@ AS		+= -EB
 KBUILD_LDFLAGS	+= -EB $(call ld-option, -maarch64elfb, -maarch64linuxb)
 LD		+= -EB
 ifeq ($(ld-name),gold)
-LDFLAGS		+= -maarch64_elf64_be_vec
+LDFLAGS		+= -EB -maarch64_elf64_be_vec
 else
-LDFLAGS		+= -maarch64elfb
+LDFLAGS		+= -EB -maarch64elfb
 endif
 UTS_MACHINE	:= aarch64_be
 else
@@ -79,9 +79,9 @@ AS		+= -EL
 KBUILD_LDFLAGS	+= -EL $(call ld-option, -maarch64elf, -maarch64linux)
 LD		+= -EL
 ifeq ($(ld-name),gold)
-LDFLAGS		+= -maarch64_elf64_le_vec
+LDFLAGS		+= -EL -maarch64_elf64_le_vec
 else
-LDFLAGS		+= -maarch64elf
+LDFLAGS		+= -EL -maarch64elf
 endif
 UTS_MACHINE	:= aarch64
 endif
