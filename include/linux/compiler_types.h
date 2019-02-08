@@ -178,6 +178,13 @@ struct ftrace_likely_data {
 
 #ifndef __diag_GCC
 #define __diag_GCC(version, severity, string)
+
+#ifndef __copy
+# define __copy(symbol)
+#endif
+
+#ifndef __randomize_layout
+# define __randomize_layout __designated_init
 #endif
 
 #ifndef __copy
