@@ -171,7 +171,7 @@ static int rtc_resume(struct device *dev)
 		timekeeping_inject_sleeptime64(&sleep_time);
 #ifdef CONFIG_SEC_PM_DEBUG
 	else
-		pm_deferred_pr_dbg("rtc: suspended for 0 seconds(%lld.%03lu)\n",
+		pm_deferred_pr_dbg("rtc: suspended for 0 seconds(%ld.%03lu)\n",
 				sleep_time.tv_sec,
 				sleep_time.tv_nsec / NSEC_PER_MSEC);
 #endif /* CONFIG_SEC_PM_DEBUG */
