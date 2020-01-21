@@ -132,3 +132,13 @@ all.config
 
 # Kdevelop4
 *.kdev4
+
+# fetched Android config fragments
+kernel/configs/android-*.cfg
+
+# samsung
+*.dtb
+*.dtbo
+*.reverse.dts
+__pycache__/
+*.pyc
