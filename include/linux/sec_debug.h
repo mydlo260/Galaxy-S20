@@ -70,8 +70,89 @@ struct ess_info_offset {
 	unsigned int per_core;
 };
 
+<<<<<<< HEAD
 extern unsigned long secdbg_base_get_kevent_index_addr(int type);
 extern void secdbg_base_get_kevent_info(struct ess_info_offset *p, int type);
+=======
+#if defined(CONFIG_SAMSUNG_VST_CAL)
+extern int volt_vst_cal_bdata;
+#endif
+
+#define SEC_DEBUG_SHARED_MAGIC0 0xFFFFFFFF
+#define SEC_DEBUG_SHARED_MAGIC1 0x95308180
+#define SEC_DEBUG_SHARED_MAGIC2 0x14F014F0
+#define SEC_DEBUG_SHARED_MAGIC3 0x00010001
+
+#ifdef CONFIG_SEC_DEBUG_EXTRA_INFO
+
+extern void simulate_extra_info_force_error(unsigned int magic);
+extern struct exynos_chipid_info exynos_soc_info;
+extern unsigned int get_smpl_warn_number(void);
+
+extern void sec_debug_init_extra_info(struct sec_debug_shared_buffer *);
+extern void sec_debug_finish_extra_info(void);
+extern void sec_debug_store_extra_info_A(char *ptr);
+extern void sec_debug_store_extra_info_B(char *ptr);
+extern void sec_debug_store_extra_info_C(char *ptr);
+extern void sec_debug_store_extra_info_M(char *ptr);
+extern void sec_debug_store_extra_info_F(char *ptr);
+extern void sec_debug_set_extra_info_fault(enum sec_debug_extra_fault_type,
+						unsigned long addr, struct pt_regs *regs);
+extern void sec_debug_set_extra_info_bug(const char *file, unsigned int line);
+extern void sec_debug_set_extra_info_panic(char *str);
+extern void sec_debug_set_extra_info_backtrace(struct pt_regs *regs);
+extern void sec_debug_set_extra_info_backtrace_cpu(struct pt_regs *regs, int cpu);
+extern void sec_debug_set_extra_info_backtrace_task(struct task_struct *tsk);
+extern void sec_debug_set_extra_info_evt_version(void);
+extern void sec_debug_set_extra_info_sysmmu(char *str);
+extern void sec_debug_set_extra_info_busmon(char *str);
+extern void sec_debug_set_extra_info_dpm_timeout(char *devname);
+extern void sec_debug_set_extra_info_smpl(unsigned long count);
+extern void sec_debug_set_extra_info_esr(unsigned int esr);
+extern void sec_debug_set_extra_info_merr(char *merr);
+extern void sec_debug_set_extra_info_hint(u64 hint);
+extern void sec_debug_set_extra_info_decon(unsigned int err);
+extern void sec_debug_set_extra_info_batt(int cap, int volt, int temp, int curr);
+extern void sec_debug_set_extra_info_ufs_error(char *str);
+extern void sec_debug_set_extra_info_zswap(char *str);
+extern void sec_debug_set_extra_info_mfc_error(char *str);
+extern void sec_debug_set_extra_info_aud(char *str);
+extern void sec_debug_set_extra_info_unfz(char *tmp);
+extern void sec_debug_set_extra_info_epd(char *str);
+
+#else
+
+#define sec_debug_init_extra_info(a)		do { } while (0)
+#define sec_debug_finish_extra_info()		do { } while (0)
+#define sec_debug_store_extra_info_A(a)		do { } while (0)
+#define sec_debug_store_extra_info_C(a)		do { } while (0)
+#define sec_debug_store_extra_info_M(a)		do { } while (0)
+#define sec_debug_store_extra_info_F(a)		do { } while (0)
+#define sec_debug_set_extra_info_fault(a, b, c)	do { } while (0)
+#define sec_debug_set_extra_info_bug(a, b)	do { } while (0)
+#define sec_debug_set_extra_info_panic(a)	do { } while (0)
+#define sec_debug_set_extra_info_backtrace(a)	do { } while (0)
+#define sec_debug_set_extra_info_backtrace_cpu(a, b)	do { } while (0)
+#define sec_debug_set_extra_info_backtrace_task(a)	do { } while (0)
+#define sec_debug_set_extra_info_evt_version()	do { } while (0)
+#define sec_debug_set_extra_info_sysmmu(a)	do { } while (0)
+#define sec_debug_set_extra_info_busmon(a)	do { } while (0)
+#define sec_debug_set_extra_info_dpm_timeout(a)	do { } while (0)
+#define sec_debug_set_extra_info_smpl(a)	do { } while (0)
+#define sec_debug_set_extra_info_esr(a)		do { } while (0)
+#define sec_debug_set_extra_info_merr(a)	do { } while (0)
+#define sec_debug_set_extra_info_hint(a)	do { } while (0)
+#define sec_debug_set_extra_info_decon(a)	do { } while (0)
+#define sec_debug_set_extra_info_batt(a, b, c, d)	do { } while (0)
+#define sec_debug_set_extra_info_ufs_error(a)	do { } while (0)
+#define sec_debug_set_extra_info_zswap(a)	do { } while (0)
+#define sec_debug_set_extra_info_mfc_error(a)	do { } while (0)
+#define sec_debug_set_extra_info_aud(a)		do { } while (0)
+#define sec_debug_set_extra_info_unfz(a)	do { } while (0)
+#define sec_debug_set_extra_info_epd(a)		do { } while (0)
+
+#endif /* CONFIG_SEC_DEBUG_EXTRA_INFO */
+>>>>>>> 6c734d7bbffa... wholetree: fix sec_debug missing declarations
 
 /*
  * SEC DEBUG AUTO COMMENT
@@ -201,6 +282,7 @@ static inline void secdbg_dtsk_clear_data(void)
 	secdbg_dtsk_set_data(DTYPE_NONE, NULL);
 }
 #else
+<<<<<<< HEAD
 #define secdbg_dtsk_print_info(a, b)		do { } while (0)
 #define secdbg_dtsk_set_data(a, b)		do { } while (0)
 #define secdbg_dtsk_clear_data()		do { } while (0)
@@ -211,6 +293,59 @@ extern void secdbg_base_set_device_shutdown_timeinfo(uint64_t start, uint64_t en
 extern void secdbg_base_clr_device_shutdown_timeinfo(void);
 extern void secdbg_base_set_shutdown_device(const char *fname, const char *dname);
 extern void secdbg_base_set_suspend_device(const char *fname, const char *dname);
+=======
+#define sec_debug_wtsk_print_info(a, b)		do { } while (0)
+#define sec_debug_wtsk_set_data(a, b)		do { } while (0)
+#define sec_debug_wtsk_clear_data()		do { } while (0)
+#endif
+
+#ifdef CONFIG_SEC_DEBUG_INIT_LOG
+extern void register_init_log_hook_func(void (*func)(const char *buf, size_t size));
+#endif
+
+/* increase if sec_debug_next is not changed and other feature is upgraded */
+#define SEC_DEBUG_KERNEL_UPPER_VERSION		(0x0001)
+/* increase if sec_debug_next is changed */
+#define SEC_DEBUG_KERNEL_LOWER_VERSION		(0x0001)
+
+/* SEC DEBUG NEXT DEFINITION */
+struct sec_debug_next {
+	unsigned int magic[2];
+	unsigned int version[2];
+
+	struct sec_debug_map map;
+	struct sec_debug_memtab memtab;
+	struct sec_debug_ksyms ksyms;
+	struct sec_debug_kcnst kcnst;
+	struct sec_debug_task task;
+	struct sec_debug_ess_info ss_info;
+	struct sec_debug_spinlock_info rlock;
+	struct sec_debug_kernel_data kernd;
+
+#ifdef CONFIG_SEC_DEBUG_AUTO_COMMENT
+	struct sec_debug_auto_comment auto_comment;
+#endif
+	struct sec_debug_shared_buffer extra_info;
+};
+
+/*
+ * Samsung TN Logging Options
+ */
+/**
+ * sec_debug_tsp_log : Leave tsp log in tsp_msg file.
+ * ( Timestamp + Tsp logs )
+ * sec_debug_tsp_log_msg : Leave tsp log in tsp_msg file and
+ * add additional message between timestamp and tsp log.
+ * ( Timestamp + additional Message + Tsp logs )
+ */
+#ifdef CONFIG_SEC_DEBUG_TSP_LOG
+extern void sec_debug_tsp_log(char *fmt, ...);
+extern void sec_debug_tsp_log_msg(char *msg, char *fmt, ...);
+extern void sec_debug_tsp_raw_data(char *fmt, ...);
+extern void sec_debug_tsp_raw_data_msg(char *msg, char *fmt, ...);
+extern void sec_tsp_raw_data_clear(void);
+extern void sec_debug_tsp_command_history(char *buf);
+>>>>>>> 6c734d7bbffa... wholetree: fix sec_debug missing declarations
 #else
 #define secdbg_base_set_device_shutdown_timeinfo(a, b, c, d)	do { } while (0)
 #define secdbg_base_clr_device_shutdown_timeinfo()	do { } while (0)
