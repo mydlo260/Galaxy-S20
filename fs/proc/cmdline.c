@@ -26,6 +26,8 @@ static const struct file_operations cmdline_proc_fops = {
 	.release	= single_release,
 };
 
+
+#ifdef CONFIG_PROC_REMOVE_SAFETYNET_FLAGS
 static void remove_flag(char *cmd, const char *flag)
 {
 	char *start_addr, *end_addr;
@@ -47,16 +49,19 @@ static void remove_safetynet_flags(char *cmd)
 	remove_flag(cmd, "androidboot.verifiedbootstate=");
 	remove_flag(cmd, "androidboot.veritymode=");
 }
+#endif
 
 static int __init proc_cmdline_init(void)
 {
 	strcpy(new_command_line, saved_command_line);
 
+#ifdef CONFIG_PROC_REMOVE_SAFETYNET_FLAGS
 	/*
 	 * Remove various flags from command line seen by userspace in order to
 	 * pass SafetyNet CTS check.
 	 */
 	remove_safetynet_flags(new_command_line);
+#endif
 
 	proc_create_single("cmdline", 0, NULL, cmdline_proc_show);
 	seq_printf(m, "%s\n", new_command_line);
