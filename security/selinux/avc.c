@@ -134,6 +134,7 @@ static inline int avc_hash(u32 ssid, u32 tsid, u16 tclass)
 {
 	return (ssid ^ (tsid<<2) ^ (tclass<<4)) & (AVC_CACHE_SLOTS - 1);
 }
+
 #ifdef CONFIG_AUDIT
 /**
  * avc_dump_av - Display an access vector in human-readable form.
@@ -459,6 +460,7 @@ error:
 
 }
 
+#ifdef CONFIG_AUDIT
 static inline u32 avc_xperms_audit_required(u32 requested,
 					struct av_decision *avd,
 					struct extended_perms_decision *xpd,
@@ -509,6 +511,7 @@ static inline int avc_xperms_audit(struct selinux_state *state,
 	return 0;
 #endif
 }
+#endif
 
 static void avc_node_free(struct rcu_head *rhead)
 {
@@ -1090,7 +1093,7 @@ int avc_has_extended_perms(struct selinux_state *state,
 	struct extended_perms_data dontaudit;
 	struct avc_xperms_node local_xp_node;
 	struct avc_xperms_node *xp_node;
-	int rc = 0, rc2;
+	int rc = 0;
 
 	xp_node = &local_xp_node;
 	BUG_ON(!requested);
@@ -1145,10 +1148,14 @@ decision:
 
 	rcu_read_unlock();
 
-	rc2 = avc_xperms_audit(state, ssid, tsid, tclass, requested,
-			&avd, xpd, xperm, rc, ad);
-	if (rc2)
-		return rc2;
+#ifdef CONFIG_AUDIT
+	{
+		int rc2 = avc_xperms_audit(ssid, tsid, tclass, requested,
+				&avd, xpd, xperm, rc, ad);
+		if (rc2)
+			return rc2;
+	}
+#endif
 	return rc;
 }
 
@@ -1222,15 +1229,18 @@ int avc_has_perm(struct selinux_state *state, u32 ssid, u32 tsid, u16 tclass,
 		 u32 requested, struct common_audit_data *auditdata)
 {
 	struct av_decision avd;
-	int rc, rc2;
+	int rc;
 
 	rc = avc_has_perm_noaudit(state, ssid, tsid, tclass, requested, 0,
 				  &avd);
 
-	rc2 = avc_audit(state, ssid, tsid, tclass, requested, &avd, rc,
-			auditdata, 0);
-	if (rc2)
-		return rc2;
+#ifdef CONFIG_AUDIT
+	{
+		int rc2 = avc_audit(ssid, tsid, tclass, requested, &avd, rc, auditdata, 0);
+		if (rc2)
+			return rc2;
+	}
+#endif
 	return rc;
 }
 
@@ -1240,16 +1250,20 @@ int avc_has_perm_flags(struct selinux_state *state,
 		       int flags)
 {
 	struct av_decision avd;
-	int rc, rc2;
+	int rc;
 
 	rc = avc_has_perm_noaudit(state, ssid, tsid, tclass, requested,
 				  (flags & MAY_NOT_BLOCK) ? AVC_NONBLOCKING : 0,
 				  &avd);
 
-	rc2 = avc_audit(state, ssid, tsid, tclass, requested, &avd, rc,
-			auditdata, flags);
-	if (rc2)
-		return rc2;
+#ifdef CONFIG_AUDIT
+	{
+		int rc2 = avc_audit(ssid, tsid, tclass, requested, &avd, rc,
+				auditdata, flags);
+		if (rc2)
+			return rc2;
+	}
+#endif
 	return rc;
 }
 
