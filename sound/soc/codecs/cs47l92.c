@@ -31,6 +31,10 @@
 #include "madera.h"
 #include "wm_adsp.h"
 
+#ifdef CONFIG_MORO_SOUND
+#include "moro_sound.h"
+#endif
+
 #define CS47L92_NUM_ADSP	1
 #define CS47L92_MONO_OUTPUTS	3
 
@@ -1932,6 +1936,11 @@ static int cs47l92_component_probe(struct snd_soc_component *component)
 	madera->dapm = snd_soc_component_get_dapm(component);
 	mutex_unlock(&madera->dapm_ptr_lock);
 
+#ifdef CONFIG_MORO_SOUND
+	moro_sound_hook_madera_pcm_probe(madera->regmap);
+
+	cs47l92->core.madera->dapm = snd_soc_codec_get_dapm(codec);
+#endif
 	ret = madera_init_inputs(component,
 				 cs47l92_dmic_inputs,
 				 ARRAY_SIZE(cs47l92_dmic_inputs),

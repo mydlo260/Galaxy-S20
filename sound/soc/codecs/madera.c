@@ -18,6 +18,9 @@
 #include <sound/pcm.h>
 #include <sound/pcm_params.h>
 #include <sound/tlv.h>
+#ifdef CONFIG_MORO_SOUND
+#include "moro_sound.h"
+#endif
 
 #include <linux/irqchip/irq-madera.h>
 #include <linux/mfd/madera/core.h>
@@ -1343,6 +1346,10 @@ int madera_init_outputs(struct snd_soc_component *component, int n_mono_routes)
 	const struct madera_codec_pdata *pdata = &madera->pdata.codec;
 	unsigned int val;
 	int i;
+
+#ifdef CONFIG_MORO_SOUND
+	moro_sound_hook_madera_pcm_probe(madera->regmap);
+#endif
 
 	if (n_mono_routes > MADERA_MAX_OUTPUT) {
 		dev_warn(madera->dev,
