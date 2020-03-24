@@ -424,8 +424,8 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common -fshort-wchar \
 		   -Werror-implicit-function-declaration \
 		   -Wno-format-security \
-		   -Werror \
 		   -std=gnu89
+
 KBUILD_CPPFLAGS := -D__KERNEL__
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
@@ -599,6 +599,11 @@ endif # KBUILD_EXTMOD
 
 ifeq ($(dot-config),1)
 include include/config/auto.conf
+
+ifdef CONFIG_CC_WERROR
+  KBUILD_CFLAGS += -Werror
+endif
+
 endif
 
 # The all: target is the default when no target is given on the
