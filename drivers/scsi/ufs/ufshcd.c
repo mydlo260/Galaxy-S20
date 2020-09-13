@@ -6024,7 +6024,7 @@ static void ufshcd_set_queue_depth(struct scsi_device *sdev)
 
 	if (dLUNumTurboWriteBufferAllocUnits) {
 		sdev->support_tw_lu = true;
-		dev_info(hba->dev, "%s: LU %d supports tw, twbuf unit : 0x%x\n",
+		dev_info(hba->dev, "%s: LU %llu supports tw, twbuf unit : 0x%x\n",
 				__func__, (int)sdev->lun, dLUNumTurboWriteBufferAllocUnits);
 	} else
 		sdev->support_tw_lu = false;
