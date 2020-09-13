@@ -61,7 +61,7 @@ static void sec_free_rdx_bootdev(phys_addr_t paddr, u64 size)
 	unsigned long pfn_start, pfn_end, pfn_idx;
 	int ret;
 
-	pr_info("start (0x%llx, 0x%llx)\n", paddr, size);
+	pr_info("start (0x%llx, 0x%llx)\n", (void *)paddr, size);
 
 	if (!sec_rdx_bootdev_paddr) {
 		pr_err("reserved addr is null\n");
