@@ -1663,6 +1663,7 @@ static inline void cancel_dirty_page(struct page *page)
 	if (PageDirty(page))
 		__cancel_dirty_page(page);
 }
+int set_page_dirty_notag(struct page *page);
 int clear_page_dirty_for_io(struct page *page);
 
 int get_cmdline(struct task_struct *task, char *buffer, int buflen);
