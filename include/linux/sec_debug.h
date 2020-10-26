@@ -59,6 +59,7 @@ enum {
 	DSS_KEVENT_MFRQ,
 };
 
+
 #define SD_ESSINFO_KEY_SIZE	(32)
 
 struct ess_info_offset {
