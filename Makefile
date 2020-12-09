@@ -656,6 +656,28 @@ ifdef CONFIG_LTO_CLANG
 LLVM_AR		:= llvm-ar
 LLVM_NM		:= llvm-nm
 export LLVM_AR LLVM_NM
+LLVM_DIS	:= llvm-dis
+export LLVM_AR LLVM_DIS
+else ifdef CONFIG_LTO_GCC
+LDFLAGS_FINAL_vmlinux := -flto=jobserver -fuse-linker-plugin
+LDFLAGS_FINAL_vmlinux += $(filter -g%, $(KBUILD_CFLAGS))
+LDFLAGS_FINAL_vmlinux += -fno-fat-lto-objects
+LDFLAGS_FINAL_vmlinux += $(call cc-disable-warning,attribute-alias,)
+LDFLAGS_FINAL_vmlinux += -Xassembler -Idrivers/misc/tzdev
+ifdef CONFIG_LTO_DEBUG
+	LDFLAGS_FINAL_vmlinux += -fdump-ipa-cgraph -fdump-ipa-inline-details
+	# add for debugging compiler crashes:
+	# LDFLAGS_FINAL_vmlinux += -dH -save-temps
+endif
+ifdef CONFIG_LTO_CP_CLONE
+	LDFLAGS_FINAL_vmlinux += -fipa-cp-clone
+endif
+LDFLAGS_FINAL_vmlinux += -Wno-lto-type-mismatch -Wno-psabi
+LDFLAGS_FINAL_vmlinux += -Wno-stringop-overflow -flinker-output=nolto-rel
+
+LDFINAL_vmlinux := ${CONFIG_SHELL} ${srctree}/scripts/gcc-ld
+AR		:= $(CROSS_COMPILE)gcc-ar
+NM		:= $(CROSS_COMPILE)gcc-nm
 endif
 
 # The arch Makefile can set ARCH_{CPP,A,C}FLAGS to override the default
@@ -878,13 +900,23 @@ lto-clang-flags	:= -flto -fvisibility=hidden
 # allow disabling only clang LTO where needed
 DISABLE_LTO_CLANG := -fno-lto -fvisibility=default
 export DISABLE_LTO_CLANG
+else ifdef CONFIG_LTO_GCC
+lto-gcc-flags	:= -flto -fno-fat-lto-objects
+lto-gcc-flags	+= $(call cc-disable-warning,attribute-alias,)
+
+ifdef CONFIG_LTO_CP_CLONE
+lto-gcc-flags	+= -fipa-cp-clone
+endif
+
+DISABLE_LTO_GCC := -fno-lto
+export DISABLE_LTO_GCC
 endif
 
 ifdef CONFIG_LTO
-LTO_CFLAGS	:= $(lto-clang-flags)
+LTO_CFLAGS	:= $(lto-clang-flags) $(lto-gcc-flags)
 KBUILD_CFLAGS	+= $(LTO_CFLAGS)
 
-DISABLE_LTO	:= $(DISABLE_LTO_CLANG)
+DISABLE_LTO	:= $(DISABLE_LTO_CLANG) $(DISABLE_LTO_GCC)
 export LTO_CFLAGS DISABLE_LTO
 endif
 
@@ -1320,6 +1352,22 @@ ifneq ($(findstring y,$(shell $(CONFIG_SHELL) \
 	@echo WARNING: Disabling clang-specific options with $(cc-name) >&2
 	$(Q)$(srctree)/scripts/config --file $(KCONFIG_CONFIG) \
 		$(foreach c,$(clang-specific-configs),-d $(c)) && \
+	$(MAKE) -f $(srctree)/Makefile olddefconfig
+endif
+endif
+
+# Disable gcc-specific config options when using a different compiler
+gcc-specific-configs := LTO_GCC
+
+PHONY += check-gcc-specific-options
+check-gcc-specific-options: $(KCONFIG_CONFIG) FORCE
+ifneq ($(cc-name),gcc)
+ifneq ($(findstring y,$(shell $(CONFIG_SHELL) \
+	$(srctree)/scripts/config --file $(KCONFIG_CONFIG) \
+		$(foreach c,$(gcc-specific-configs),-s $(c)))),)
+	@echo WARNING: Disabling gcc-specific options with $(cc-name) >&2
+	$(Q)$(srctree)/scripts/config --file $(KCONFIG_CONFIG) \
+		$(foreach c,$(gcc-specific-configs),-d $(c)) && \
 	$(MAKE) -f $(srctree)/Makefile olddefconfig
 endif
 endif
