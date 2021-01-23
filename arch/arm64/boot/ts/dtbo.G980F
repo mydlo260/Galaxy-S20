@@ -1,0 +1,7 @@
+arch/arm64/boot/dts/samsung/exynos990-x1slte_eur_open_00.dtbo
+    custom0=0x00000000
+    custom1=0x14000000
+
+arch/arm64/boot/dts/samsung/exynos990-x1slte_eur_open_21.dtbo
+    custom0=0x15000000
+    custom1=0xff000000
