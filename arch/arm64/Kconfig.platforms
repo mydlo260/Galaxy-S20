@@ -342,6 +342,21 @@ config SOC_EXYNOS9830
 	select PINCTRL
 	select SAMSUNG_DMADEV
 
+choice
+	prompt "Samsung EXYNOS9830 Model (only for device-trees)"
+	depends on SOC_EXYNOS9830
+	default MODEL_NONE
+
+	help
+	  Select the phone model.
+
+	config MODEL_NONE
+		bool "None"
+	config MODEL_G980F
+		bool "G980F"
+		select DTC
+endchoice
+
 config SOC_EXYNOS9830_EVT0
 	default n
 	bool "Samsung EXYNOS9830 EVT0"
