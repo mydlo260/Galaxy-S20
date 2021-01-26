@@ -55,7 +55,7 @@ toolchain = {
 
 models = {
     'G980F': {
-        'config': 'exynos9820-beyond0lte_defconfig'
+        'config': 'exynos9830-x1slte_defconfig'
     }
 }
 
