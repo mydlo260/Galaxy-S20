@@ -297,7 +297,6 @@ static inline unsigned int dbg_snapshot_get_core_ehld_stat(unsigned int cpu)
 	return 0;
 }
 static inline int dbg_snapshot_reserved_mem_check(unsigned long node, unsigned long size)
-				unsigned int paddr, unsigned int size)
 {
 	return 0;
 }
