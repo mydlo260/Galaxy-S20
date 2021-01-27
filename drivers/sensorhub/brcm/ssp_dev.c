@@ -788,7 +788,7 @@ static int panel_notifier_callback(struct notifier_block *self, unsigned long ev
 	} else if (event == PANEL_EVENT_UB_CON_CHANGED) {
 		int i = *((char *)data);
 		if(i < 0 || i  > 1){
-			pr_info("[SSP] %s PANEL_EVENT_UB_CON_CHANGED, event errno(%d)\n", __func__, i);
+			pr_info("[SSP] %s PANEL_EVENT_UB_CON_CHANGED, event errno(%lu)\n", __func__, i);
 		} else {
 			ssp_data_info->ub_disabled = i;
 			if (ssp_data_info->ub_disabled) {
