@@ -85,18 +85,6 @@ extern void __chk_io_ptr(const volatile void __iomem *);
 #endif
 
 /*
- * Some architectures need to provide custom definitions of macros provided
- * by linux/compiler-*.h, and can do so using asm/compiler.h. We include that
- * conditionally rather than using an asm-generic wrapper in order to avoid
- * build failures if any C compilation, which will include this file via an
- * -include argument in c_flags, occurs prior to the asm-generic wrappers being
- * generated.
- */
-#ifdef CONFIG_HAVE_ARCH_COMPILER_H
-#include <asm/compiler.h>
-#endif
-
-/*
  * Generic compiler-dependent macros required for kernel
  * build go below this comment. Actual compiler/compiler version
  * specific implementations come from the above header files
@@ -138,24 +126,24 @@ struct ftrace_likely_data {
  * For example, some of them are for compiler specific plugins.
  */
 #ifndef __designated_init
-# define __designated_init
+#define __designated_init
 #endif
 
 #ifndef __latent_entropy
-# define __latent_entropy
+#define __latent_entropy
 #endif
 
 #ifndef __randomize_layout
-# define __randomize_layout __designated_init
+#define __randomize_layout __designated_init
 #endif
 
 #ifndef __no_randomize_layout
-# define __no_randomize_layout
+#define __no_randomize_layout
 #endif
 
 #ifndef randomized_struct_fields_start
-# define randomized_struct_fields_start
-# define randomized_struct_fields_end
+#define randomized_struct_fields_start
+#define randomized_struct_fields_end
 #endif
 
 #ifndef __visible
@@ -229,14 +217,6 @@ struct ftrace_likely_data {
 #define __deprecated_for_modules
 #endif
 
-#ifndef __must_check
-#define __must_check
-#endif
-
-#ifndef CONFIG_ENABLE_MUST_CHECK
-#undef __must_check
-#define __must_check
-#endif
 #ifndef CONFIG_ENABLE_WARN_DEPRECATED
 #undef __deprecated
 #undef __deprecated_for_modules
@@ -244,43 +224,6 @@ struct ftrace_likely_data {
 #define __deprecated_for_modules
 #endif
 
-#ifndef __malloc
-#define __malloc
-#endif
-
-/*
- * Allow us to avoid 'defined but not used' warnings on functions and data,
- * as well as force them to be emitted to the assembly file.
- *
- * As of gcc 3.4, static functions that are not marked with attribute((used))
- * may be elided from the assembly file.  As of gcc 3.4, static data not so
- * marked will not be elided, but this may change in a future gcc version.
- *
- * NOTE: Because distributions shipped with a backported unit-at-a-time
- * compiler in gcc 3.3, we must define __used to be __attribute__((used))
- * for gcc >=3.3 instead of 3.4.
- *
- * In prior versions of gcc, such functions and data would be emitted, but
- * would be warned about except with attribute((unused)).
- *
- * Mark functions that are referenced only in inline assembly as __used so
- * the code is emitted even though it appears to be unreferenced.
- */
-#ifndef __used
-# define __used			/* unimplemented */
-#endif
-
-#ifndef __maybe_unused
-# define __maybe_unused		/* unimplemented */
-#endif
-
-#ifndef __always_unused
-# define __always_unused	/* unimplemented */
-#endif
-
-#ifndef noinline
-#define noinline
-#endif
 
 /*
  * Rather then using noinline to prevent stack consumption, use
@@ -398,73 +341,13 @@ struct ftrace_likely_data {
  */
 #define noinline_for_stack noinline
 
-/*
- * From the GCC manual:
- *
- * Many functions do not examine any values except their arguments,
- * and have no effects except the return value.  Basically this is
- * just slightly more strict class than the `pure' attribute above,
- * since function is not allowed to read global memory.
- *
- * Note that a function that has pointer arguments and examines the
- * data pointed to must _not_ be declared `const'.  Likewise, a
- * function that calls a non-`const' function usually must not be
- * `const'.  It does not make sense for a `const' function to return
- * `void'.
- */
-#ifndef __attribute_const__
-# define __attribute_const__	/* unimplemented */
-#endif
-
-#ifndef __designated_init
-# define __designated_init
-#endif
-
-#ifndef __latent_entropy
-# define __latent_entropy
-#endif
-
-#ifndef __copy
-# define __copy(symbol)
-#endif
-
-#ifndef __randomize_layout
-# define __randomize_layout __designated_init
-#endif
-
-#ifndef __no_randomize_layout
-# define __no_randomize_layout
-#endif
-
-#ifndef randomized_struct_fields_start
-# define randomized_struct_fields_start
-# define randomized_struct_fields_end
-#endif
-
-/*
- * Tell gcc if a function is cold. The compiler will assume any path
- * directly leading to the call is unlikely.
- */
-
-#ifndef __cold
-#define __cold
-#endif
-
 /* Simple shorthand for a section definition */
 #ifndef __section
 # define __section(S) __attribute__ ((__section__(#S)))
 #endif
 
-#ifndef __visible
-#define __visible
-#endif
-
 #ifndef __nostackprotector
-# define __nostackprotector
-#endif
-
-#ifndef __norecordmcount
-#define __norecordmcount
+#define __nostackprotector
 #endif
 
 #ifndef __nocfi
