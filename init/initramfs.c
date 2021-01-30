@@ -614,8 +614,6 @@ __setup("skip_initramfs", skip_initramfs_param);
 
 static int __init populate_rootfs(void)
 {
-	char *err;
-
 #ifdef CONFIG_INITRAMFS_SKIP
 	if (do_skip_initramfs) {
 		if (initrd_start)
@@ -624,8 +622,6 @@ static int __init populate_rootfs(void)
 	}
 #endif
 
-static int __init populate_rootfs(void)
-{
 	/* Load the built in initramfs */
 	char *err = unpack_to_rootfs(__initramfs_start, __initramfs_size);
 	if (err)
