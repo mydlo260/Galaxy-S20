@@ -2210,7 +2210,6 @@ static int proc_ioctl(struct usb_dev_state *ps, struct usbdevfs_ioctl *ctl)
 				if (retval == -ENOIOCTLCMD)
 					retval = -ENOTTY;
 			}
-		}
 	}
 
 	/* cleanup and return */
