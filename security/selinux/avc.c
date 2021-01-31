@@ -1150,7 +1150,7 @@ decision:
 
 #ifdef CONFIG_AUDIT
 	{
-		int rc2 = avc_xperms_audit(ssid, tsid, tclass, requested,
+		int rc2 = avc_xperms_audit(state, ssid, tsid, tclass, requested,
 				&avd, xpd, xperm, rc, ad);
 		if (rc2)
 			return rc2;
@@ -1236,7 +1236,7 @@ int avc_has_perm(struct selinux_state *state, u32 ssid, u32 tsid, u16 tclass,
 
 #ifdef CONFIG_AUDIT
 	{
-		int rc2 = avc_audit(ssid, tsid, tclass, requested, &avd, rc, auditdata, 0);
+		int rc2 = avc_audit(state, ssid, tsid, tclass, requested, &avd, rc, auditdata, 0);
 		if (rc2)
 			return rc2;
 	}
@@ -1258,7 +1258,7 @@ int avc_has_perm_flags(struct selinux_state *state,
 
 #ifdef CONFIG_AUDIT
 	{
-		int rc2 = avc_audit(ssid, tsid, tclass, requested, &avd, rc,
+		int rc2 = avc_audit(state, ssid, tsid, tclass, requested, &avd, rc,
 				auditdata, flags);
 		if (rc2)
 			return rc2;
