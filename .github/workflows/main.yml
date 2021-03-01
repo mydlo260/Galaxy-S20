@@ -1,0 +1,137 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the action will run. 
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      # Runs a single command using the runners shell
+      - name: Run a one-line script
+        run: echo Hello, world!
+
+      # Runs a set of commands using the runners shell
+      - name: Run a multi-line script
+        run: |
+          echo Add other actions to build,
+          
+name: Build
+
+on: [push]
+
+env:name: Build
+
+on: [push]
+
+env:
+  TOOLCHAIN: default
+  INSTALLER: yes
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        model: [ "G980F" ]
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.6'
+
+      - name: Kernel Configure
+        run: |
+          set -e -o pipefail
+          ./thunderbuild config                    \
+                       model=${{ matrix.model }} \
+                       name="ThunderS20"         \
+                       toolchain=$TOOLCHAIN      \
+                       +magisk                   \
+                       +dtb                      \
+          2>&1 | tee config.info
+      - name: Install gcc-aarch64-linux-gnu
+        if: env.TOOLCHAIN == 'system-gcc' || env.TOOLCHAIN == 'system-clang'
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: sudo apt-get install -y -qq gcc-aarch64-linux-gnu
+      - name: Install clang
+        if: env.TOOLCHAIN == 'system-clang'
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: sudo apt-get install -y -qq llvm lld clang
+      - name: Deploy Toolchain
+        if: env.TOOLCHAIN != 'system-gcc' && env.TOOLCHAIN != 'system-clang'
+        run: git clone --depth 1 -j $(nproc) --branch $TOOLCHAIN --single-branch https://github.com/CruelKernel/samsung-exynos9820-toolchain toolchain
+
+      - name: Kernel Build
+        run: ./thunderbuild :build
+
+      - name: Install mkbootimg
+        run: |
+          wget -q https://android.googlesource.com/platform/system/tools/mkbootimg/+archive/refs/heads/master.tar.gz -O - | tar xzf - mkbootimg.py
+          chmod +x mkbootimg.py
+          sudo mv mkbootimg.py /usr/local/bin/mkbootimg
+      - name: Install mkdtboimg
+        run: |
+          wget -q https://android.googlesource.com/platform/system/libufdt/+archive/refs/heads/master.tar.gz -O - | tar --strip-components 2 -xzf - utils/src/mkdtboimg.py
+          chmod +x mkdtboimg.py
+          sudo mv mkdtboimg.py /usr/local/bin/mkdtboimg
+      - name: Install avbtool
+        run: |
+          wget -q https://android.googlesource.com/platform/external/avb/+archive/refs/heads/master.tar.gz -O - | tar xzf - avbtool.py
+          chmod +x avbtool.py
+          sudo mv avbtool.py /usr/local/bin/avbtool
+      - name: Create ThunderS20 images for ${{ matrix.model }}
+        run: ./thunderbuild :mkimg
+      - name: Create CruelKernel installer for ${{ matrix.model }}
+        if: env.INSTALLER == 'yes'
+        run: ./thunderbuild :pack
+
+      - name: Avoid Double Zipping in Installer
+        if: env.INSTALLER == 'yes'
+        run: |
+          mkdir -p installer && cd installer
+          unzip ../ThunderS20.zip
+      - name: Upload Kernel Zip
+        if: env.INSTALLER == 'yes'
+        uses: actions/upload-artifact@v2
+        with:
+          name: ThunderS20-${{ matrix.model }}
+          path: installer/*
+          if-no-files-found: error
+      - name: Upload Kernel Images
+        if: env.INSTALLER != 'yes'
+        uses: actions/upload-artifact@v2
+        with:
+          name: ThunderS20-${{ matrix.model }}
+          path: '*.img'
+          if-no-files-found: error
+
+      - name: Upload Kernel Info
+        uses: actions/upload-artifact@v2
+        with:
+          name: ConfigurationInfo-${{ matrix.model }}
+          path: config.*
+          if-no-files-found: error
